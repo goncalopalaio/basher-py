@@ -6,8 +6,8 @@ from libs.adb import *
 
 def main():
 	parser = argparse.ArgumentParser(description="Runs 'uiautomator dump' and gets the center coordinates of the view using its id or text. This is done for all connected devices. The coordinates will be printed in the format of the adb shell input tap format.")
-	parser.add_argument('-id', help='id or text of the view', required=True)
-	parser.add_argument('-retries', help='Determines the number of times to attempt to retrieve the view information per device', default = 1)
+	parser.add_argument('-i', '--id', help='id or text of the view', required=True)
+	parser.add_argument('-r', '--retries', help='Determines the number of times to attempt to retrieve the view information per device', default = 1)
 	args = parser.parse_args()
 
 	device_ids = adb_get_devices()
