@@ -7,8 +7,6 @@ import re
 
 from libs.input_event_codes import *
 
-LOG_MARKERS = ["KEY_HOMEPAGE", "KEY_BACK"]
-
 ABS_MT_POSITION_X = "ABS_MT_POSITION_X"
 ABS_MT_POSITION_Y = "ABS_MT_POSITION_Y"
 
@@ -49,14 +47,15 @@ def transform_to_adb_shell_sendevent(line):
 	d = components[3]
 
 	# Add a marker when the home key is pressed ince the adb shell getevent command might not immediatly give us the output. This will make it easier to know when the user actions actually started (For example after your sequence of events press the home button).
-	if c in LOG_MARKERS:
+	if c.startswith("KEY_") or c.startswith("BTN_"):
 		print(f"# Pressed {c}")
-		
+
 
 	b_succeed, b = convert_input_event_code_to_int(components[1])
 	c_succeed, c = convert_input_event_code_to_int(components[2])
 
 	if b_succeed and c_succeed:
+
 		# Remove trailing ':'
 		device = device.replace(":", "") 
 
@@ -68,6 +67,12 @@ def transform_to_adb_shell_sendevent(line):
 		# Note that sendevent is pretty slow by default:
 		# https://stackoverflow.com/a/54547196/868164
 
+		# Here's an example of how to actually push a binary and have permissions to run the executable:
+		# https://github.com/Cartucho/android-touch-record-replay
+		# adb push mysendevent /data/local/tmp/
+		# adb shell chmod +x /data/local/tmp/mysendevent
+		# adb shell /data/local/tmp/mysendevent
+
 	else:
 		# print(f"Error: Could not perform full conversion -> {b} {c} {d}")
 		pass
@@ -75,7 +80,8 @@ def transform_to_adb_shell_sendevent(line):
 
 # Notes:
 # It appears that adb shell getevent -l doesn't immediately produces the output. It's likely that it's buffering it's output.
-	
+# Since sdk 23 we have exec-out which doesn't do buffering? (https://github.com/Cartucho/android-touch-record-replay/blob/master/record_touch_events.sh)	
+
 def main():
 	parser = argparse.ArgumentParser(description="""
 	Transforms the output of 'adb shell getevent -l' into a human readable format.
